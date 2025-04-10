@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% load static tailwind_tags %}
+<html>
+  <head>
+    {% tailwind_css %}
+    <title>{{ template_data.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+
+  <body>
+    <!-- Header / navbar -->
+
+    <!-- Header -->
+
+    <div>
+      {% block content %}
+      {% endblock content %}
+    </div>
+
+    <!-- Footer -->
+
+    <!-- Footer -->
+  </body>
+</html>

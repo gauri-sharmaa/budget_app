@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from enum import Enum
+
+from django.forms import ValidationError
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -23,6 +26,7 @@ class User(AbstractBaseUser):
     income = models.DecimalField(max_digits=10, decimal_places=2)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     weekly_limit = models.DecimalField(max_digits=10, decimal_places=2)
+    mealPlan = models.OneToOneField('MealPlan', on_delete=models.CASCADE, blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -36,39 +40,44 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
 
-class MealPlan(models.Model):
+class MealPlanType(Enum):
     UNLIMITED = 'unlimited'
     OTHER = 'other'
-    TYPE_CHOICES = [
-        (UNLIMITED, 'Unlimited'),
-        (OTHER, 'Other'),
-    ]
 
+    @classmethod
+    def choices(cls):
+        return [(tag.name, tag.value) for tag in cls]
+class MealPlan(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=10, choices=MealPlanType.choices())
 
     def __str__(self):
         return f"{self.user.name}'s Meal Plan"
 
-class Expense(models.Model):
-    MEAL = 'Meal'
-    SAVINGS = 'Savings'
-    OTHER = 'Other'
-    TYPE_CHOICES = [
-        (MEAL, 'Meal'),
-        (SAVINGS, 'Savings'),
-        (OTHER, 'Other'),
-    ]
+class ExpenseType(Enum):
+    MEAL = 'meal'
+    SAVINGS = 'savings'
+    OTHER = 'other'
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
+    @classmethod
+    def choices(cls):
+        return [(tag.name, tag.value) for tag in cls]
+class Expense(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses', blank=True, null=True)
+    meal_plan = models.ForeignKey(MealPlan, on_delete=models.CASCADE, related_name='expenses', blank=True, null=True)
     title = models.CharField(max_length=255)
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=10, choices=ExpenseType.choices())
     date = models.DateField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     comment = models.TextField(blank=True, null=True)
     recurring_day = models.IntegerField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
+
+    def clean(self):
+        # Ensure a user or a meal plan is provided
+        if not self.user and not self.meal_plan:
+            raise ValidationError('Either user or meal plan must be provided.')
 
     def __str__(self):
         return f"{self.title} - {self.cost}"
