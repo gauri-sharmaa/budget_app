@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center mb-6">Register</h2>
+        <form method="post" action="{% url 'accounts.register' %}">
+            {% csrf_token %}
+            
+            <!-- Username Field -->
+            <div class="mb-4">
+                <label for="{{ form.username.id_for_label }}" class="block text-gray-700 font-medium mb-2">
+                    {{ form.username.label }}
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {{ form.username.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Email Field -->
+            <div class="mb-4">
+                <label for="{{ form.email.id_for_label }}" class="block text-gray-700 font-medium mb-2">
+                    {{ form.email.label }}
+                </label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {{ form.email.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Password1 Field -->
+            <div class="mb-4">
+                <label for="{{ form.password1.id_for_label }}" class="block text-gray-700 font-medium mb-2">
+                    {{ form.password1.label }}
+                </label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {{ form.password1.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Password2 Field -->
+            <div class="mb-4">
+                <label for="{{ form.password2.id_for_label }}" class="block text-gray-700 font-medium mb-2">
+                    {{ form.password2.label }}
+                </label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {{ form.password2.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                Register
+            </button>
+        </form>
+        <p class="text-center text-gray-600 mt-4">
+            Already have an account? <a href="{% url 'accounts.login' %}" class="text-blue-500 hover:underline">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

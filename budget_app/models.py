@@ -1,44 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import User
 from enum import Enum
-
 from django.forms import ValidationError
 
-class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('The Email field must be set')
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-
-        return self.create_user(email, password, **extra_fields)
-
-class User(AbstractBaseUser):
-    email = models.EmailField(unique=True)
-    name = models.CharField(max_length=255)
-    income = models.DecimalField(max_digits=10, decimal_places=2)
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
-    weekly_limit = models.DecimalField(max_digits=10, decimal_places=2)
-    mealPlan = models.OneToOneField('MealPlan', on_delete=models.CASCADE, blank=True, null=True)
-
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-
-    objects = UserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    income = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    weekly_limit = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
-        return self.email
+        return self.user.username
 
 class MealPlanType(Enum):
     UNLIMITED = 'unlimited'
@@ -47,13 +19,14 @@ class MealPlanType(Enum):
     @classmethod
     def choices(cls):
         return [(tag.name, tag.value) for tag in cls]
+
 class MealPlan(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='meal_plan')
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     type = models.CharField(max_length=10, choices=MealPlanType.choices())
 
     def __str__(self):
-        return f"{self.user.name}'s Meal Plan"
+        return f"{self.user.username}'s Meal Plan"
 
 class ExpenseType(Enum):
     MEAL = 'meal'
@@ -63,6 +36,7 @@ class ExpenseType(Enum):
     @classmethod
     def choices(cls):
         return [(tag.name, tag.value) for tag in cls]
+
 class Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses', blank=True, null=True)
     meal_plan = models.ForeignKey(MealPlan, on_delete=models.CASCADE, related_name='expenses', blank=True, null=True)
@@ -75,7 +49,6 @@ class Expense(models.Model):
     end_date = models.DateField(blank=True, null=True)
 
     def clean(self):
-        # Ensure a user or a meal plan is provided
         if not self.user and not self.meal_plan:
             raise ValidationError('Either user or meal plan must be provided.')
 

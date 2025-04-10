@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center mb-6">Complete Your Profile</h2>
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- UserProfile Form -->
+            <h3 class="text-lg font-bold mt-4">User Profile</h3>
+            {{ userProfileForm.as_p }}
+
+            <!-- MealPlan Form -->
+            <h3 class="text-lg font-bold mt-4">Meal Plan</h3>
+            {{ mealPlanForm.as_p }}
+
+            <button type="submit" class="w-full bg-blue-500 text-white mt-5 py-2 px-4 rounded hover:bg-blue-600">
+                Complete Registration
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

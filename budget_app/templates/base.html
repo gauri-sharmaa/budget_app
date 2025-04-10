@@ -5,20 +5,70 @@
     {% tailwind_css %}
     <title>{{ template_data.title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Automatically hide the alert after 5 seconds
+      document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            alert.classList.add("hidden");
+          }, 5000); // 5000ms = 5 seconds
+        });
+      });
+    </script>
   </head>
 
   <body>
-    <!-- Header / navbar -->
+    <!-- Global Error Messages -->
+    <div class="fixed top-4 right-4 space-y-4 z-50">
+      {% if errors %}
+        {% for error in errors %}
+        <div class="alert bg-red-100 text-red-700 p-4 rounded shadow-md flex items-center justify-between">
+            <span>{{ error }}</span>
+            <button class="text-red-700 hover:text-red-900 text-2xl font-bold ml-4" onclick="this.parentElement.classList.add('hidden')">
+                &times;
+            </button>
+        </div>
+        {% endfor %}
+      {% endif %}
+      {% if messages %}
+        {% for msg in messages %}
+        <div class="alert bg-green-100 text-green-700 p-4 rounded shadow-md flex items-center justify-between">
+            <span>{{ msg }}</span>
+            <button class="text-green-700 hover:text-green-900 text-2xl font-bold ml-4" onclick="this.parentElement.classList.add('hidden')">
+                &times;
+            </button>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <!-- Error Messages -->
 
+    <!-- Header / navbar -->
+    <nav class="bg-gray-800 text-white p-4 w-full">
+      <div class="container mx-auto flex justify-between items-center">
+        <!-- Logo -->
+        <a href={% url 'dashboard.index' %} class="text-lg font-bold hover:text-gray-300">Budget App</a>
+
+        <!-- Navigation Links -->
+        <div class="flex space-x-4">
+          {% if user.is_superuser %}
+          <a class="hover:text-gray-300" href="{% url 'admin:index' %}">Admin Dashboard</a>
+          {% endif %}
+          {% if user.is_authenticated %}
+          <a class="hover:text-gray-300" href="{% url 'accounts.logout' %}">Log out ({{ user.username }})</a>
+          {% else %}
+          <a href={% url 'accounts.login' %} class="hover:text-gray-300">Login</a>
+          <a href={% url 'accounts.register' %} class="hover:text-gray-300">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
     <!-- Header -->
 
     <div>
       {% block content %}
       {% endblock content %}
     </div>
-
-    <!-- Footer -->
-
-    <!-- Footer -->
   </body>
 </html>

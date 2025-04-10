@@ -5,6 +5,7 @@
 
 1. Create your python environment and activate it
 2. ```pip install -r requirements.txt```
+3. ```python manage.py migrate```
 
 # How to run
 
