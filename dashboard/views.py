@@ -1,6 +1,6 @@
 from django import forms
 from django.shortcuts import redirect, render
-from budget_app.models import Expense, MealPlan, UserProfile
+from budget_app.models import Expense, ExpenseType, MealPlan, UserProfile
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -25,8 +25,8 @@ def dashboard(request):
 
 class AddExpenseForm(forms.ModelForm):
     EXPENSE_CHOICES = [
-        ('user', 'User Expense'),
-        ('mealplan', 'MealPlan Expense'),
+        ('user_profile', 'User Expense'),
+        ('meal_plan', 'MealPlan Expense'),
     ]
     expense_for = forms.ChoiceField(choices=EXPENSE_CHOICES, label="Expense For", widget=forms.RadioSelect)
 
@@ -55,9 +55,12 @@ class AddExpenseForm(forms.ModelForm):
         """Set the user or meal_plan based on the expense_for field."""
         expense_for = self.data.get('expense_for')
 
-        if expense_for == 'user':
-            self.instance.user = self.user  # Set the user on the instance
-        elif expense_for == 'mealplan':
+        if expense_for == 'user_profile':
+            try:
+                self.instance.user_profile = self.user.profile  # Set the user_profile on the instance
+            except UserProfile.DoesNotExist:
+                raise forms.ValidationError("You do not have a user profile to link this expense to.")
+        elif expense_for == 'meal_plan':
             try:
                 self.instance.meal_plan = self.user.meal_plan  # Set the meal_plan on the instance
             except MealPlan.DoesNotExist:
@@ -65,6 +68,9 @@ class AddExpenseForm(forms.ModelForm):
 
 @login_required
 def add_expense(request):
+    # Check for the "expenseFor" GET parameter
+    expense_for = request.GET.get("expenseFor")  # Get the parameter value (if any)
+
     if request.method == "POST":
         form = AddExpenseForm(request.POST, user=request.user)  # Pass the user to the form
         try:
@@ -78,6 +84,13 @@ def add_expense(request):
             messages.success(request, "Expense added successfully!")
             return redirect("dashboard.dashboard")
     else:
-        form = AddExpenseForm(user=request.user)  # Pass the user to the form
+        # Pre-select the "expense_for" field based on the GET parameter
+        initial_data = {}
+        if expense_for == "userprofile":
+            initial_data["expense_for"] = "user_profile"
+        elif expense_for == "mealplan":
+            initial_data["expense_for"] = "meal_plan"
+
+        form = AddExpenseForm(user=request.user, initial=initial_data)  # Pass initial data to the form
 
     return render(request, "add_expense.html", {"form": form})

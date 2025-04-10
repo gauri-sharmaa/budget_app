@@ -6,9 +6,9 @@
   <div>Balance: {{ user.profile.balance }}</div>
   <div>Weekly Limit: {{ user.profile.weekly_limit }}</div>
   <div>
-    <div>Expenses</div>
+    <div>User Expenses</div>
     <ul>
-      {% for expense in user.expenses.all %}
+      {% for expense in user.profile.expenses.all %}
       <li>
         {{ expense.title }} ({{ expense.type }}, {{ expense.date }}): {{ expense.cost }}
       </li>
@@ -17,10 +17,27 @@
   </div>
   <!-- Button to Navigate to Add Expense Page -->
   <a
-    href="{% url 'dashboard.add_expense' %}"
+    href="{% url 'dashboard.add_expense' %}?expenseFor=userprofile"
     class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
   >
-    Add Expense
+    Add User Expense
+  </a>
+  <div>
+    <div>Meal plan Expenses</div>
+    <ul>
+      {% for expense in user.meal_plan.expenses.all %}
+      <li>
+        {{ expense.title }} ({{ expense.type }}, {{ expense.date }}): {{ expense.cost }}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <!-- Button to Navigate to Add Expense Page -->
+  <a
+    href="{% url 'dashboard.add_expense' %}?expenseFor=mealplan"
+    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+  >
+    Add User Expense
   </a>
 </div>
 {% endblock %}

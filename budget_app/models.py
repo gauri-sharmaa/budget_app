@@ -35,10 +35,10 @@ class ExpenseType(Enum):
 
     @classmethod
     def choices(cls):
-        return [(tag.name, tag.value) for tag in cls]
+        return [(tag.value, tag.value) for tag in cls]
 
 class Expense(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses', blank=True, null=True)
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='expenses', blank=True, null=True)
     meal_plan = models.ForeignKey(MealPlan, on_delete=models.CASCADE, related_name='expenses', blank=True, null=True)
     title = models.CharField(max_length=255)
     type = models.CharField(max_length=10, choices=ExpenseType.choices())
@@ -49,8 +49,11 @@ class Expense(models.Model):
     end_date = models.DateField(blank=True, null=True)
 
     def clean(self):
-        if not self.user and not self.meal_plan:
+        if not self.user_profile and not self.meal_plan:
             raise ValidationError('Either user or meal plan must be provided.')
+        if self.meal_plan and self.type != ExpenseType.MEAL.value:
+            print(self.type)
+            raise ValidationError('Meal plan expenses must be of type MEAL.')
 
     def __str__(self):
         return f"{self.title} - {self.cost}"
