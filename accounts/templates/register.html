@@ -20,6 +20,32 @@
                 {% endif %}
             </div>
 
+            <!-- First Name Field -->
+             <div class="mb-4">
+                <label for="{{ form.first_name.id_for_label }}" class="block text-gray-700 font-medium mb-2">
+                    {{ form.first_name.label }}
+                </label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {{ form.first_name.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Last Name Field -->
+             <div class="mb-4">
+                <label for="{{ form.last_name.id_for_label }}" class="block text-gray-700 font-medium mb-2">
+                    {{ form.last_name.label }}
+                </label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {{ form.last_name.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
             <!-- Email Field -->
             <div class="mb-4">
                 <label for="{{ form.email.id_for_label }}" class="block text-gray-700 font-medium mb-2">

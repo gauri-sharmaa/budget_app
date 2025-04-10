@@ -25,15 +25,17 @@ def login(request):
             auth_login(request, user)
             return redirect("dashboard.index")
         else:
-            return render(request, "login.html", {"errors": ["Invalid credentials"]})
+            messages.error(request, "Invalid credentials")
+            return render(request, "login.html")
     return render(request, "login.html")
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, label="Email")
-
+    first_name = forms.CharField(required=True, label="First Name")
+    last_name = forms.CharField(required=True, label="Last Name")
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2")
+        fields = ("username", "first_name", "last_name", "email", "password1", "password2")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -109,7 +111,9 @@ def create_user_profile(request):
             user = User.objects.create_user(
                 username=user_data['username'],
                 email=user_data['email'],
-                password=user_data['password1']
+                password=user_data['password1'],
+                first_name=user_data['first_name'],
+                last_name=user_data['last_name'],
             )
 
             # Create the UserProfile

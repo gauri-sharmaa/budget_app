@@ -1,0 +1,26 @@
+{% extends 'base.html' %} {% block content %}
+<div>
+  <div>Dashboard</div>
+  <div>Welcome {{ user.first_name }} {{ user.last_name }}</div>
+  <div>Income: {{ user.profile.income }}</div>
+  <div>Balance: {{ user.profile.balance }}</div>
+  <div>Weekly Limit: {{ user.profile.weekly_limit }}</div>
+  <div>
+    <div>Expenses</div>
+    <ul>
+      {% for expense in user.expenses.all %}
+      <li>
+        {{ expense.title }} ({{ expense.type }}, {{ expense.date }}): {{ expense.cost }}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <!-- Button to Navigate to Add Expense Page -->
+  <a
+    href="{% url 'dashboard.add_expense' %}"
+    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+  >
+    Add Expense
+  </a>
+</div>
+{% endblock %}
