@@ -68,29 +68,39 @@ class AddExpenseForm(forms.ModelForm):
 
 @login_required
 def add_expense(request):
-    # Check for the "expenseFor" GET parameter
-    expense_for = request.GET.get("expenseFor")  # Get the parameter value (if any)
+    expense_for = request.GET.get("expenseFor")
 
     if request.method == "POST":
-        form = AddExpenseForm(request.POST, user=request.user)  # Pass the user to the form
+        form = AddExpenseForm(request.POST, user=request.user)
         try:
-            form.makeValid()  # Set user or meal_plan before validation
+            form.makeValid()
         except forms.ValidationError as e:
             messages.error(request, str(e))
             return redirect("dashboard.add_expense")
-        if form.is_valid():  # Ensure the form is valid
+
+        if form.is_valid():
             expense = form.save(commit=False)
             expense.save()
+
+            # Update the appropriate balance
+            if expense.user_profile:
+                profile = expense.user_profile
+                profile.balance -= expense.cost
+                profile.save()
+            elif expense.meal_plan:
+                meal_plan = expense.meal_plan
+                meal_plan.balance -= expense.cost
+                meal_plan.save()
+
             messages.success(request, "Expense added successfully!")
             return redirect("dashboard.dashboard")
     else:
-        # Pre-select the "expense_for" field based on the GET parameter
         initial_data = {}
         if expense_for == "userprofile":
             initial_data["expense_for"] = "user_profile"
         elif expense_for == "mealplan":
             initial_data["expense_for"] = "meal_plan"
 
-        form = AddExpenseForm(user=request.user, initial=initial_data)  # Pass initial data to the form
+        form = AddExpenseForm(user=request.user, initial=initial_data)
 
     return render(request, "add_expense.html", {"form": form})
