@@ -102,5 +102,6 @@ def add_expense(request):
             initial_data["expense_for"] = "meal_plan"
 
         form = AddExpenseForm(user=request.user, initial=initial_data)
+        #hello added a comment to check something?
 
     return render(request, "add_expense.html", {"form": form})
